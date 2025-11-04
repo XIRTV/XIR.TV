@@ -28,7 +28,12 @@
         #logo {
             font-size: 1.5em;
             font-weight: bold;
-            color: #001F3F; /* Azul oscuro */
+            color: #fff; /* Blanco */
+        }
+        #time {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff; /* Blanco */
         }
         #searchBar {
             padding: 8px;
@@ -85,17 +90,11 @@
     <div class="container">
         <header>
             <div id="logo">XIRTV</div>
-            <input type="text" id="searchBar" placeholder="Buscar">
+            <div id="time"></div>
+            <input type="text" id="searchBar" placeholder="Buscar" onkeyup="searchChannels()">
         </header>
         <video id="mainVideo" controls autoplay></video>
         <div id="channelList">
-            <div class="channelItem" onclick="playChannel('canalPode')">
-                <div class="channelLogo">CP</div>
-                <div class="channelInfo">
-                    <div class="channelName">Canal Pode</div>
-                    <div class="channelDescription">Amor y Emoción</div>
-                </div>
-            </div>
             <div class="channelItem" onclick="playChannel('canalA24')">
                 <div class="channelLogo">A24</div>
                 <div class="channelInfo">
@@ -242,21 +241,15 @@
     <script>
         var video = document.getElementById('mainVideo');
         var hls = new Hls();
-
         function playChannel(channelId) {
             var videoSource = '';
-
             // Detach existing HLS stream if any
             if (hls) {
                 hls.detachMedia();
                 hls.destroy();
                 hls = new Hls(); // Re-instantiate hls object
             }
-
             switch (channelId) {
-                case 'canalPode':
-                    videoSource = 'URL_DEL_CANAL_PODE.mp4'; // Reemplaza con la URL real
-                    break;
                 case 'canalA24':
                     videoSource = 'https://g1.vxral-hor.transport.edge-access.net/a15/ngrp:a24-100056_all/a24-100056.m3u8';
                     break;
@@ -320,7 +313,6 @@
                 default:
                     videoSource = '';
             }
-
             // Utiliza HLS.js si es compatible
             if (Hls.isSupported()) {
                 hls.loadSource(videoSource);
@@ -338,6 +330,39 @@
             }
             else {
                 console.log('HLS is not supported on this browser.');
+            }
+        }
+         function updateTime() {
+            var now = new Date();
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            var seconds = now.getSeconds();
+            // Asegurarse de que los minutos y segundos tengan dos dígitos
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            var timeString = hours + ':' + minutes + ':' + seconds;
+            document.getElementById('time').textContent = timeString;
+        }
+        // Actualizar el tiempo cada segundo
+        setInterval(updateTime, 1000);
+        // Inicializar el tiempo al cargar la página
+        updateTime();
+
+        function searchChannels() {
+            var input, filter, channelList, channelItem, channelName, i, txtValue;
+            input = document.getElementById('searchBar');
+            filter = input.value.toUpperCase();
+            channelList = document.getElementById('channelList');
+            channelItem = channelList.getElementsByClassName('channelItem');
+
+            for (i = 0; i < channelItem.length; i++) {
+                channelName = channelItem[i].getElementsByClassName('channelName')[0];
+                txtValue = channelName.textContent || channelName.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    channelItem[i].style.display = "";
+                } else {
+                    channelItem[i].style.display = "none";
+                }
             }
         }
     </script>
